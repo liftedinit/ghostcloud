@@ -2,8 +2,9 @@ package keeper_test
 
 import (
 	"context"
-	"ghostcloud/x/ghostcloud/keeper"
 	"testing"
+
+	"ghostcloud/x/ghostcloud/keeper"
 
 	"ghostcloud/testutil/sample"
 

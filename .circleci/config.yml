@@ -50,7 +50,7 @@ jobs:
       - go/install-goreleaser:
           version: *goreleaser_version
       - go/goreleaser-release:
-          project-path: project
+          project-path: "${HOME}/project"
           publish-release: true
 
 workflows:

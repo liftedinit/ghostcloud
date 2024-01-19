@@ -3,7 +3,7 @@
 version: 2.1
 
 GO_VERSION: &go_version '1.21'
-GORELEASER_VERSION: &goreleaser_version 'v1.22.1'
+GORELEASER_VERSION: &goreleaser_version 'v1.23.0'
 
 orbs:
   go: circleci/go@1.9.0

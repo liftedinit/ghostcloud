@@ -44,7 +44,7 @@ jobs:
     executor:
       name: go/default
       tag: *go_version
-    resource_class: x-large
+    resource_class: xlarge
     steps:
       - checkout
       - go/install-goreleaser:

@@ -3,6 +3,7 @@
 version: 2.1
 
 GO_VERSION: &go_version '1.21'
+GORELEASER_VERSION: &goreleaser_version 'v1.22.1'
 
 orbs:
   go: circleci/go@1.9.0
@@ -22,8 +23,7 @@ jobs:
       - codecov/upload:
           file: coverage-filtered.out
       - go/install-goreleaser:
-          version: v1.22.1
-      # Use go/goreleaser-release when GITHUB_TOKEN is set
+          version: *goreleaser_version
       - run: goreleaser release --snapshot --clean
       - run:
           name: move artifacts
@@ -40,9 +40,32 @@ jobs:
       - checkout
       - run: make vet
       - run: make govulncheck
+  release:
+    executor:
+      name: go/default
+      tag: *go_version
+    resource_class: x-large
+    steps:
+      - checkout
+      - go/install-goreleaser:
+          version: *goreleaser_version
+      - go/goreleaser-release:
+          publish-release: true
 
 workflows:
   main:
     jobs:
       - build
       - security
+  release:
+    jobs:
+      - release:
+          context:
+            - GITHUB_CREDS
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only:
+                - /^v?\d(\.\d){2}$/ # e.g. major, minor, patch (0.1.1)
+                - /^v?\d(\.\d){2}(-[\w-]+(\.[\w-]+)?)$/ # prereleases (0.1.1-alpha.8)

@@ -6,7 +6,7 @@ GO_VERSION: &go_version '1.21'
 GORELEASER_VERSION: &goreleaser_version 'v1.23.0'
 
 orbs:
-  go: circleci/go@1.9.0
+  go: circleci/go@1.10.0
   codecov: codecov/codecov@3.3.0
 
 jobs:
@@ -50,6 +50,7 @@ jobs:
       - go/install-goreleaser:
           version: *goreleaser_version
       - go/goreleaser-release:
+          github-token: "$GITHUB_TOKEN"
           project-path: "${HOME}/project"
           publish-release: true
 

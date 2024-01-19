@@ -49,10 +49,12 @@ jobs:
       - checkout
       - go/install-goreleaser:
           version: *goreleaser_version
-      - go/goreleaser-release:
-          github-token: "$GITHUB_TOKEN"
-          project-path: "${HOME}/project"
-          publish-release: true
+      # Something is wrong with the go/goreleaser orb, so we have to do this manually
+      - run:
+          name: Releasing to GitHub
+          command: |
+            goreleaser check
+            goreleaser release
 
 workflows:
   main:

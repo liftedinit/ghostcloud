@@ -4,10 +4,10 @@ import (
 	// Using `math/rand` is okay for the simulation, but not in production.
 	"math/rand" // #nosec
 
-	keepertest "ghostcloud/testutil/keeper"
-	"ghostcloud/testutil/sample"
-	ghostcloudsimulation "ghostcloud/x/ghostcloud/simulation"
-	"ghostcloud/x/ghostcloud/types"
+	keepertest "github.com/liftedinit/ghostcloud/testutil/keeper"
+	"github.com/liftedinit/ghostcloud/testutil/sample"
+	ghostcloudsimulation "github.com/liftedinit/ghostcloud/x/ghostcloud/simulation"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"

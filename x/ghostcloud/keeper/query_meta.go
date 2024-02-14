@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"ghostcloud/x/ghostcloud/types"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

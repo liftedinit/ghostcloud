@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	"ghostcloud/x/ghostcloud/types"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )

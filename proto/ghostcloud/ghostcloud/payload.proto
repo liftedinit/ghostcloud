@@ -4,7 +4,7 @@ package ghostcloud.ghostcloud;
 import "ghostcloud/ghostcloud/archive.proto";
 import "ghostcloud/ghostcloud/dataset.proto";
 
-option go_package = "ghostcloud/x/ghostcloud/types";
+option go_package = "github.com/liftedinit/ghostcloud/x/ghostcloud/types";
 
 message Payload {
   oneof payload_option {

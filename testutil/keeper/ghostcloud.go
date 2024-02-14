@@ -3,9 +3,9 @@ package keeper
 import (
 	"testing"
 
-	"ghostcloud/testutil/sample"
-	"ghostcloud/x/ghostcloud/keeper"
-	"ghostcloud/x/ghostcloud/types"
+	"github.com/liftedinit/ghostcloud/testutil/sample"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/keeper"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"

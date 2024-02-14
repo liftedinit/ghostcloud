@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"ghostcloud/x/ghostcloud/types"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"

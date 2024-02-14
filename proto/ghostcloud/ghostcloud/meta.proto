@@ -3,7 +3,7 @@ package ghostcloud.ghostcloud;
 
 import "cosmos_proto/cosmos.proto";
 
-option go_package = "ghostcloud/x/ghostcloud/types";
+option go_package = "github.com/liftedinit/ghostcloud/x/ghostcloud/types";
 
 message Meta {
   string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];

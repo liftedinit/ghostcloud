@@ -6,8 +6,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
 
-	"ghostcloud/app"
-	"ghostcloud/cmd/ghostcloudd/cmd"
+	"github.com/liftedinit/ghostcloud/app"
+	"github.com/liftedinit/ghostcloud/cmd/ghostcloudd/cmd"
 )
 
 func main() {

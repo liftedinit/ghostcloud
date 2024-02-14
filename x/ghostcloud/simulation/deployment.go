@@ -4,10 +4,10 @@ import (
 	"math/rand"
 	"strconv"
 
-	keepertest "ghostcloud/testutil/keeper"
-	"ghostcloud/testutil/sample"
-	"ghostcloud/x/ghostcloud/keeper"
-	"ghostcloud/x/ghostcloud/types"
+	keepertest "github.com/liftedinit/ghostcloud/testutil/keeper"
+	"github.com/liftedinit/ghostcloud/testutil/sample"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/keeper"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	simappparams "cosmossdk.io/simapp/params"
 

@@ -9,7 +9,7 @@ import "ghostcloud/ghostcloud/filter-by.proto";
 import "ghostcloud/ghostcloud/meta.proto";
 import "ghostcloud/ghostcloud/params.proto";
 
-option go_package = "ghostcloud/x/ghostcloud/types";
+option go_package = "github.com/liftedinit/ghostcloud/x/ghostcloud/types";
 
 // Query defines the gRPC querier service.
 service Query {

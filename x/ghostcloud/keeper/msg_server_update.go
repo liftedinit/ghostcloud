@@ -3,7 +3,7 @@ package keeper
 import (
 	"context"
 
-	"ghostcloud/x/ghostcloud/types"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"

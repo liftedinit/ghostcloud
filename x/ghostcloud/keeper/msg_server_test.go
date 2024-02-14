@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	keepertest "ghostcloud/testutil/keeper"
-	"ghostcloud/x/ghostcloud/keeper"
-	"ghostcloud/x/ghostcloud/types"
+	keepertest "github.com/liftedinit/ghostcloud/testutil/keeper"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/keeper"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	"github.com/stretchr/testify/require"
 

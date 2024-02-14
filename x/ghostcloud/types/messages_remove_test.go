@@ -3,8 +3,8 @@ package types_test
 import (
 	"testing"
 
-	"ghostcloud/testutil/sample"
-	"ghostcloud/x/ghostcloud/types"
+	"github.com/liftedinit/ghostcloud/testutil/sample"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	"github.com/stretchr/testify/require"
 

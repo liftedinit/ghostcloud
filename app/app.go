@@ -97,14 +97,14 @@ import (
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
-	ghostcloudmodule "ghostcloud/x/ghostcloud"
-	ghostcloudmodulekeeper "ghostcloud/x/ghostcloud/keeper"
-	ghostcloudmoduletypes "ghostcloud/x/ghostcloud/types"
+	ghostcloudmodule "github.com/liftedinit/ghostcloud/x/ghostcloud"
+	ghostcloudmodulekeeper "github.com/liftedinit/ghostcloud/x/ghostcloud/keeper"
+	ghostcloudmoduletypes "github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
-	appparams "ghostcloud/app/params"
-	"ghostcloud/docs"
+	appparams "github.com/liftedinit/ghostcloud/app/params"
+	"github.com/liftedinit/ghostcloud/docs"
 )
 
 const (

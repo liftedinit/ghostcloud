@@ -1,4 +1,4 @@
-module ghostcloud
+module github.com/liftedinit/ghostcloud
 
 go 1.21
 

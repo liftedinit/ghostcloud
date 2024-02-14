@@ -37,7 +37,7 @@ format-install:
 format: ## Run formatter (goimports)
 	@echo "--> Running goimports"
 	$(MAKE) format-install
-	@find . -name '*.go' -exec goimports -w -local github.com/cosmos/cosmos-sdk,cosmossdk.io,github.com/cometbft,github.com/cosmos.ibc-go,ghostcloud  {} \;
+	@find . -name '*.go' -exec goimports -w -local github.com/cosmos/cosmos-sdk,cosmossdk.io,github.com/cometbft,github.com/cosmos.ibc-go,github.com/liftedinit/ghostcloud  {} \;
 
 #### COVERAGE ####
 

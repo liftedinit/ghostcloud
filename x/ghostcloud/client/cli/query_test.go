@@ -3,10 +3,10 @@ package cli_test
 import (
 	"testing"
 
-	"ghostcloud/testutil/keeper"
-	"ghostcloud/testutil/network"
-	"ghostcloud/x/ghostcloud/client/cli"
-	"ghostcloud/x/ghostcloud/types"
+	"github.com/liftedinit/ghostcloud/testutil/keeper"
+	"github.com/liftedinit/ghostcloud/testutil/network"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/client/cli"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/status"

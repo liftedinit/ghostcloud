@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"ghostcloud/x/ghostcloud/types"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	"github.com/asaskevich/govalidator"
 

@@ -3,12 +3,12 @@ package ghostcloud_test
 import (
 	"testing"
 
-	"ghostcloud/testutil/sample"
+	"github.com/liftedinit/ghostcloud/testutil/sample"
 
-	keepertest "ghostcloud/testutil/keeper"
-	"ghostcloud/testutil/nullify"
-	"ghostcloud/x/ghostcloud"
-	"ghostcloud/x/ghostcloud/types"
+	keepertest "github.com/liftedinit/ghostcloud/testutil/keeper"
+	"github.com/liftedinit/ghostcloud/testutil/nullify"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	"github.com/stretchr/testify/require"
 )

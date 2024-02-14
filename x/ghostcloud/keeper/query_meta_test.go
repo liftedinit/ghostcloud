@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"ghostcloud/x/ghostcloud/keeper"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/keeper"
 
-	"ghostcloud/testutil/sample"
+	"github.com/liftedinit/ghostcloud/testutil/sample"
 
-	testkeeper "ghostcloud/testutil/keeper"
-	"ghostcloud/x/ghostcloud/types"
+	testkeeper "github.com/liftedinit/ghostcloud/testutil/keeper"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	"github.com/stretchr/testify/require"
 

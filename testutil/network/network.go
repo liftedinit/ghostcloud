@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"ghostcloud/testutil/keeper"
-	"ghostcloud/testutil/sample"
-	"ghostcloud/x/ghostcloud/types"
+	"github.com/liftedinit/ghostcloud/testutil/keeper"
+	"github.com/liftedinit/ghostcloud/testutil/sample"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	"github.com/stretchr/testify/require"
 
@@ -16,7 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 
-	"ghostcloud/app"
+	"github.com/liftedinit/ghostcloud/app"
 
 	tmdb "github.com/cometbft/cometbft-db"
 	tmrand "github.com/cometbft/cometbft/libs/rand"

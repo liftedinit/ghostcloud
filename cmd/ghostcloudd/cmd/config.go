@@ -3,7 +3,7 @@ package cmd
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"ghostcloud/app"
+	"github.com/liftedinit/ghostcloud/app"
 )
 
 func initSDKConfig() {

@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"ghostcloud/x/ghostcloud/types"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	"github.com/spf13/cobra"
 

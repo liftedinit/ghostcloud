@@ -39,8 +39,8 @@ import (
 
 	// this line is used by starport scaffolding # root/moduleImport
 
-	"ghostcloud/app"
-	appparams "ghostcloud/app/params"
+	"github.com/liftedinit/ghostcloud/app"
+	appparams "github.com/liftedinit/ghostcloud/app/params"
 )
 
 // NewRootCmd creates a new root command for a Cosmos SDK application

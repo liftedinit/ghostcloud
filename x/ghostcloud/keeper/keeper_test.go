@@ -3,7 +3,7 @@ package keeper_test
 import (
 	"testing"
 
-	keepertest "ghostcloud/testutil/keeper"
+	keepertest "github.com/liftedinit/ghostcloud/testutil/keeper"
 
 	"github.com/stretchr/testify/require"
 

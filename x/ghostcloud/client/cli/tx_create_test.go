@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"ghostcloud/testutil/network"
-	"ghostcloud/testutil/sample"
-	"ghostcloud/x/ghostcloud/client/cli"
+	"github.com/liftedinit/ghostcloud/testutil/network"
+	"github.com/liftedinit/ghostcloud/testutil/sample"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/client/cli"
 
 	"github.com/stretchr/testify/require"
 

@@ -1,7 +1,7 @@
 **ghostcloud** is an innovative web hosting blockchain powered by Cosmos SDK and the CometBFT consensus engine.
 
-[![build](https://img.shields.io/circleci/build/github/liftedinit/ghostcloud-cosmos/main)](https://app.circleci.com/pipelines/github/liftedinit/ghostcloud-cosmos)
-[![coverage](https://img.shields.io/codecov/c/github/liftedinit/ghostcloud-cosmos)](https://app.codecov.io/gh/liftedinit/ghostcloud-cosmos)
+[![build](https://img.shields.io/circleci/build/github/liftedinit/ghostcloud/main)](https://app.circleci.com/pipelines/github/liftedinit/ghostcloud)
+[![coverage](https://img.shields.io/codecov/c/github/liftedinit/ghostcloud)](https://app.codecov.io/gh/liftedinit/ghostcloud)
 
 <!-- TOC -->
   * [Requirements](#requirements-)

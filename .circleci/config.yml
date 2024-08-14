@@ -2,7 +2,7 @@
 # The Lifted Initiative
 version: 2.1
 
-GO_VERSION: &go_version '1.22.5'
+GO_VERSION: &go_version '1.22'
 GORELEASER_VERSION: &goreleaser_version 'v1.23.0'
 
 orbs:

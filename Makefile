@@ -1,4 +1,5 @@
 #### HELP ####
+BUILD_TAGS ?= libsecp256k1_sdk
 
 help: ## Display this help screen
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -6,7 +7,7 @@ help: ## Display this help screen
 
 #### LINT ####
 
-golangci_version=v1.55.1
+golangci_version=v1.62.2
 
 lint-install:
 	@echo "--> Installing golangci-lint $(golangci_version)"
@@ -16,12 +17,12 @@ lint-install:
 lint: ## Run linter (golangci-lint)
 	@echo "--> Running linter"
 	$(MAKE) lint-install
-	@golangci-lint run ./x/...
+	@golangci-lint run --build-tags ${BUILD_TAGS} ./x/...
 
 lint-fix:
 	@echo "--> Running linter"
 	$(MAKE) lint-install
-	@golangci-lint run ./x/... --fix
+	@golangci-lint run --build-tags ${BUILD_TAGS} ./x/... --fix
 
 .PHONY: lint lint-fix
 
@@ -43,7 +44,7 @@ format: ## Run formatter (goimports)
 
 coverage: ## Run coverage report
 	@echo "--> Running coverage"
-	@go test -race -cpu=$$(nproc) -covermode=atomic -coverprofile=coverage.out $$(go list ./x/...) > /dev/null 2>&1
+	@go test -tags ${BUILD_TAGS} -race -cpu=$$(nproc) -covermode=atomic -coverprofile=coverage.out $$(go list ./x/...)
 	@echo "--> Running coverage filter"
 	@./scripts/filter-coverage.sh
 	@echo "--> Running coverage report"
@@ -61,7 +62,7 @@ coverage: ## Run coverage report
 
 test: ## Run tests
 	@echo "--> Running tests"
-	@go test -race -cpu=$$(nproc) $$(go list ./x/...)
+	@go test -tags ${BUILD_TAGS} -race -cpu=$$(nproc) $$(go list ./x/...)
 
 .PHONY: test
 
@@ -69,7 +70,7 @@ test: ## Run tests
 
 vet: ## Run go vet
 	@echo "--> Running go vet"
-	@go vet ./...
+	@go vet -tags ${BUILD_TAGS} ./...
 
 .PHONY: vet
 
@@ -94,4 +95,4 @@ govulncheck-install:
 govulncheck: ## Run govulncheck
 	@echo "--> Running govulncheck"
 	$(MAKE) govulncheck-install
-	@govulncheck ./...
+	@govulncheck -tags ${BUILD_TAGS} ./...

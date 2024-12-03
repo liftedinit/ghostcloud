@@ -19,8 +19,8 @@
 
 Before setting up ghostcloud, ensure your system meets the following prerequisites:
 
-- Ignite CLI, version 0.27.2
-- Go programming language, version 1.21 or higher
+- Ignite CLI, version v28.6.0
+- Go programming language, version 1.23 or higher
 
 ## Get started 
 

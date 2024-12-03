@@ -365,11 +365,11 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 }
 
 var (
-	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 0, 2, 1}, []string{"ghostcloud", "params"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 0, 2, 1}, []string{"ghostcloud", "params"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Metas_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 0, 2, 1}, []string{"ghostcloud", "deployments"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Metas_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 0, 2, 1}, []string{"ghostcloud", "deployments"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Content_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 3, 0, 4, 1, 5, 4}, []string{"ghostcloud", "content", "creator", "name", "path"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Content_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 3, 0, 4, 1, 5, 4}, []string{"ghostcloud", "content", "creator", "name", "path"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (

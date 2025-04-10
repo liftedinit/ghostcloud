@@ -85,6 +85,11 @@ fi
 
 echo "Starting node..."
 
+# Modify payload size limits
+sed -i 's/max_body_bytes = 100000/max_body_bytes = 10485760/g' $HOME_DIR/config/config.toml
+sed -i 's/max_tx_bytes = 1048576/max_tx_bytes = 5242880/g' $HOME_DIR/config/config.toml
+sed -i 's/max_txs_bytes = 1073741824/max_txs_bytes = 5368709120/g' $HOME_DIR/config/config.toml
+
 # Opens the RPC endpoint to outside connections
 sed -i 's/laddr = "tcp:\/\/127.0.0.1:26657"/c\laddr = "tcp:\/\/0.0.0.0:'$RPC'"/g' $HOME_DIR/config/config.toml
 sed -i 's/cors_allowed_origins = \[\]/cors_allowed_origins = \["\*"\]/g' $HOME_DIR/config/config.toml

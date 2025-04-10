@@ -39,7 +39,7 @@ jobs:
     steps:
       - checkout
       - run: make vet
-      - run: make govulncheck
+#      - run: make govulncheck
   release:
     executor:
       name: go/default

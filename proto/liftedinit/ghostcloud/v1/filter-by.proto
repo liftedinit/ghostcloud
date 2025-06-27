@@ -1,5 +1,5 @@
 syntax = "proto3";
-package ghostcloud.ghostcloud;
+package liftedinit.ghostcloud.v1;
 
 option go_package = "github.com/liftedinit/ghostcloud/x/ghostcloud/types";
 

@@ -1,10 +1,10 @@
 syntax = "proto3";
-package ghostcloud.ghostcloud;
+package liftedinit.ghostcloud.v1;
 
 import "gogoproto/gogo.proto";
-import "ghostcloud/ghostcloud/dataset.proto";
-import "ghostcloud/ghostcloud/meta.proto";
-import "ghostcloud/ghostcloud/params.proto";
+import "liftedinit/ghostcloud/v1/dataset.proto";
+import "liftedinit/ghostcloud/v1/meta.proto";
+import "liftedinit/ghostcloud/v1/params.proto";
 
 option go_package = "github.com/liftedinit/ghostcloud/x/ghostcloud/types";
 

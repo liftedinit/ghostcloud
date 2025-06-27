@@ -65,11 +65,11 @@ func datasetFromZip(content []byte) (*types.Dataset, error) {
 	}, nil
 }
 func datasetFromArchive(archive *types.Archive) (*types.Dataset, error) {
-	switch archive.Type {
+	switch archive.ArchiveType {
 	case types.ArchiveType_Zip:
 		return datasetFromZip(archive.Content)
 	default:
-		return nil, fmt.Errorf("unsupported archive type: %s", archive.Type)
+		return nil, fmt.Errorf("unsupported archive type: %s", archive.ArchiveType)
 	}
 }
 

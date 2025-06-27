@@ -3,44 +3,50 @@ package keeper
 import (
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/store/prefix"
+	"cosmossdk.io/collections"
+	"cosmossdk.io/log"
+	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 
-	"github.com/cometbft/cometbft/libs/log"
+	storecore "cosmossdk.io/core/store"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 )
 
 type (
 	Keeper struct {
-		cdc        codec.BinaryCodec
-		storeKey   storetypes.StoreKey
-		memKey     storetypes.StoreKey
-		paramstore paramtypes.Subspace
+		cdc      codec.BinaryCodec
+		storeKey storetypes.StoreKey
+		logger   log.Logger
+		Schema   collections.Schema
 	}
 )
 
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	storeKey,
-	memKey storetypes.StoreKey,
-	ps paramtypes.Subspace,
+	storeService storecore.KVStoreService,
+	logger log.Logger,
 
-) *Keeper {
-	// set KeyTable if it has not already been set
-	if !ps.HasKeyTable() {
-		ps = ps.WithKeyTable(types.ParamKeyTable())
+) Keeper {
+	logger = logger.With(log.ModuleKey, "x/"+types.ModuleName)
+
+	sb := collections.NewSchemaBuilder(storeService)
+
+	k := Keeper{
+		cdc:    cdc,
+		logger: logger,
 	}
 
-	return &Keeper{
-		cdc:        cdc,
-		storeKey:   storeKey,
-		memKey:     memKey,
-		paramstore: ps,
+	schema, err := sb.Build()
+	if err != nil {
+		panic(err)
 	}
+
+	k.Schema = schema
+
+	return k
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
@@ -79,7 +85,7 @@ func (k Keeper) Remove(ctx sdk.Context, addr sdk.AccAddress, name string) {
 
 func (k Keeper) RemoveDataset(ctx sdk.Context, addr sdk.AccAddress, name string) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentItemMetaPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, types.DeploymentKey(addr, name))
+	iterator := storetypes.KVStorePrefixIterator(store, types.DeploymentKey(addr, name))
 	defer iterator.Close()
 
 	for ; iterator.Valid(); iterator.Next() {
@@ -87,7 +93,7 @@ func (k Keeper) RemoveDataset(ctx sdk.Context, addr sdk.AccAddress, name string)
 	}
 
 	store = prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentItemContentPrefix)
-	iterator = sdk.KVStorePrefixIterator(store, types.DeploymentKey(addr, name))
+	iterator = storetypes.KVStorePrefixIterator(store, types.DeploymentKey(addr, name))
 	defer iterator.Close()
 
 	for ; iterator.Valid(); iterator.Next() {
@@ -113,7 +119,7 @@ func (k Keeper) SetItem(ctx sdk.Context, addr sdk.AccAddress, name string, item 
 
 func (k Keeper) GetDataset(ctx sdk.Context, addr sdk.AccAddress, name string) (dataset *types.Dataset) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentItemMetaPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, types.DeploymentKey(addr, name))
+	iterator := storetypes.KVStorePrefixIterator(store, types.DeploymentKey(addr, name))
 	defer iterator.Close()
 
 	items := make([]*types.Item, 0)
@@ -169,7 +175,7 @@ func (k Keeper) getDeploymentMetaStore(ctx sdk.Context) prefix.Store {
 
 func (k Keeper) GetAllMeta(ctx sdk.Context) (metas []*types.Meta) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.DeploymentMetaKeyPrefix)
+	iterator := storetypes.KVStorePrefixIterator(store, types.DeploymentMetaKeyPrefix)
 	defer iterator.Close()
 
 	for ; iterator.Valid(); iterator.Next() {

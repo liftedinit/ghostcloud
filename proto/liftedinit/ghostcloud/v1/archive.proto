@@ -1,5 +1,5 @@
 syntax = "proto3";
-package ghostcloud.ghostcloud;
+package liftedinit.ghostcloud.v1;
 
 option go_package = "github.com/liftedinit/ghostcloud/x/ghostcloud/types";
 
@@ -8,7 +8,7 @@ enum ArchiveType {
 }
 
 message Archive {
-  ArchiveType type = 1;
+  ArchiveType archive_type = 1;
   bytes content = 2; // This can be large
 }
 

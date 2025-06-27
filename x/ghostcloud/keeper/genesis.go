@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	storetypes "cosmossdk.io/store/types"
 	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -8,7 +9,7 @@ import (
 
 func GetAllDeployments(ctx sdk.Context, k Keeper) (deployments []*types.Deployment) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.DeploymentMetaKeyPrefix)
+	iterator := storetypes.KVStorePrefixIterator(store, types.DeploymentMetaKeyPrefix)
 
 	defer iterator.Close()
 

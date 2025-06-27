@@ -21,11 +21,11 @@ import (
 	tmdb "github.com/cometbft/cometbft-db"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 
+	pruningtypes "cosmossdk.io/store/pruning/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	pruningtypes "github.com/cosmos/cosmos-sdk/store/pruning/types"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	cosmosnetwork "github.com/cosmos/cosmos-sdk/testutil/network"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
@@ -138,7 +138,7 @@ func DefaultConfig() network.Config {
 		chainID  = "chain-" + tmrand.NewRand().Str(6)
 	)
 	return network.Config{
-		Codec:             encoding.Marshaler,
+		Codec:             encoding.Codec,
 		TxConfig:          encoding.TxConfig,
 		LegacyAmino:       encoding.Amino,
 		InterfaceRegistry: encoding.InterfaceRegistry,
@@ -159,7 +159,7 @@ func DefaultConfig() network.Config {
 				baseapp.SetChainID(chainID),
 			)
 		},
-		GenesisState:    app.ModuleBasics.DefaultGenesis(encoding.Marshaler),
+		GenesisState:    app.ModuleBasics.DefaultGenesis(encoding.Codec),
 		TimeoutCommit:   2 * time.Second,
 		ChainID:         chainID,
 		NumValidators:   1,

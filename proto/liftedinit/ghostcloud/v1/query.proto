@@ -1,13 +1,13 @@
 syntax = "proto3";
-package ghostcloud.ghostcloud;
+package liftedinit.ghostcloud.v1;
 
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
-import "ghostcloud/ghostcloud/dataset.proto";
-import "ghostcloud/ghostcloud/filter-by.proto";
-import "ghostcloud/ghostcloud/meta.proto";
-import "ghostcloud/ghostcloud/params.proto";
+import "liftedinit/ghostcloud/v1/dataset.proto";
+import "liftedinit/ghostcloud/v1/filter-by.proto";
+import "liftedinit/ghostcloud/v1/meta.proto";
+import "liftedinit/ghostcloud/v1/params.proto";
 
 option go_package = "github.com/liftedinit/ghostcloud/x/ghostcloud/types";
 

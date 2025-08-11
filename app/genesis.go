@@ -2,8 +2,13 @@ package app
 
 import (
 	"encoding/json"
+	"testing"
 
-	"github.com/cosmos/cosmos-sdk/codec"
+	dbm "github.com/cosmos/cosmos-db"
+
+	"cosmossdk.io/log"
+
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 )
 
 // The genesis state of the blockchain is represented here as a map of raw json
@@ -16,6 +21,10 @@ import (
 type GenesisState map[string]json.RawMessage
 
 // NewDefaultGenesisState generates the default state for the application.
-func NewDefaultGenesisState(cdc codec.JSONCodec) GenesisState {
-	return ModuleBasics.DefaultGenesis(cdc)
+func NewDefaultGenesisState(tb testing.TB) GenesisState {
+	tb.Helper()
+	// we "pre"-instantiate the application for getting the injected/configured encoding configuration
+	// note, this is not necessary when using app wiring, as depinject can be directly used (see root_v2.go)
+	tempApp := New(log.NewNopLogger(), dbm.NewMemDB(), nil, true, simtestutil.NewAppOptionsWithFlagHome(tb.TempDir()))
+	return tempApp.DefaultGenesis()
 }

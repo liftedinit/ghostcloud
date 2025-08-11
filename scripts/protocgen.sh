@@ -35,6 +35,7 @@ for module in $custom_modules; do
 
   # incorrect ref
   find api/$dirPath -type f -name '*.go' -exec sed -i '' -e 's|types "github.com/cosmos/cosmos-sdk/types"|types "cosmossdk.io/api/cosmos/base/v1beta1"|g' {} \;
+  find api/$dirPath -type f -name '*.go' -exec sed -i '' -e 's|query "github.com/cosmos/cosmos-sdk/types/query"|query "cosmossdk.io/api/cosmos/base/query/v1beta1"|g' {} \;
 
   rm -rf $dirPath
 done

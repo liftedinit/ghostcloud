@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"cosmossdk.io/collections"
+	storecore "cosmossdk.io/core/store"
 	"cosmossdk.io/log"
 	"cosmossdk.io/store/prefix"
 	storetypes "cosmossdk.io/store/types"
-
-	storecore "cosmossdk.io/core/store"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
@@ -17,10 +17,11 @@ import (
 
 type (
 	Keeper struct {
-		cdc      codec.BinaryCodec
-		storeKey storetypes.StoreKey
-		logger   log.Logger
-		Schema   collections.Schema
+		cdc          codec.BinaryCodec
+		storeService storecore.KVStoreService
+		logger       log.Logger
+		Schema       collections.Schema
+		params       collections.Item[types.Params]
 	}
 )
 
@@ -35,9 +36,11 @@ func NewKeeper(
 	sb := collections.NewSchemaBuilder(storeService)
 
 	k := Keeper{
-		cdc:    cdc,
-		logger: logger,
+		cdc:          cdc,
+		storeService: storeService,
+		logger:       logger,
 	}
+	k.params = collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc))
 
 	schema, err := sb.Build()
 	if err != nil {
@@ -54,7 +57,8 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 }
 
 func (k Keeper) HasDeployment(ctx sdk.Context, creator sdk.AccAddress, name string) bool {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentMetaKeyPrefix)
+	base := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	store := prefix.NewStore(base, types.DeploymentMetaKeyPrefix)
 	return store.Has(types.DeploymentKey(creator, name))
 }
 
@@ -64,7 +68,8 @@ func (k Keeper) SetDeployment(ctx sdk.Context, addr sdk.AccAddress, meta *types.
 }
 
 func (k Keeper) SetMeta(ctx sdk.Context, addr sdk.AccAddress, meta *types.Meta) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentMetaKeyPrefix)
+	base := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	store := prefix.NewStore(base, types.DeploymentMetaKeyPrefix)
 	b := k.cdc.MustMarshal(meta)
 	store.Set(types.DeploymentKey(addr, meta.GetName()), b)
 }
@@ -79,56 +84,64 @@ func (k Keeper) SetDataset(ctx sdk.Context, addr sdk.AccAddress, name string, da
 func (k Keeper) Remove(ctx sdk.Context, addr sdk.AccAddress, name string) {
 	k.RemoveDataset(ctx, addr, name)
 
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentMetaKeyPrefix)
+	base := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	store := prefix.NewStore(base, types.DeploymentMetaKeyPrefix)
 	store.Delete(types.DeploymentKey(addr, name))
 }
 
 func (k Keeper) RemoveDataset(ctx sdk.Context, addr sdk.AccAddress, name string) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentItemMetaPrefix)
-	iterator := storetypes.KVStorePrefixIterator(store, types.DeploymentKey(addr, name))
-	defer iterator.Close()
+	base := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
-	for ; iterator.Valid(); iterator.Next() {
-		store.Delete(iterator.Key())
+	// Delete item metas
+	metaStore := prefix.NewStore(base, types.DeploymentItemMetaPrefix)
+	it := storetypes.KVStorePrefixIterator(metaStore, types.DeploymentKey(addr, name))
+	defer it.Close()
+
+	for ; it.Valid(); it.Next() {
+		metaStore.Delete(it.Key())
 	}
 
-	store = prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentItemContentPrefix)
-	iterator = storetypes.KVStorePrefixIterator(store, types.DeploymentKey(addr, name))
-	defer iterator.Close()
+	// Delete item contents
+	contentStore := prefix.NewStore(base, types.DeploymentItemContentPrefix)
+	it2 := storetypes.KVStorePrefixIterator(contentStore, types.DeploymentKey(addr, name))
+	defer it2.Close()
 
-	for ; iterator.Valid(); iterator.Next() {
-		store.Delete(iterator.Key())
+	for ; it2.Valid(); it2.Next() {
+		contentStore.Delete(it2.Key())
 	}
 }
 
 func (k Keeper) SetItem(ctx sdk.Context, addr sdk.AccAddress, name string, item *types.Item) {
-	// Set Item meta
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentItemMetaPrefix)
+	base := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
+	// Set Item meta
+	metaStore := prefix.NewStore(base, types.DeploymentItemMetaPrefix)
 	meta := item.GetMeta()
 	path := meta.GetPath()
 
 	b := k.cdc.MustMarshal(meta)
-	store.Set(types.DeploymentItemKey(addr, name, path), b)
+	metaStore.Set(types.DeploymentItemKey(addr, name, path), b)
 
 	// Set Item content
-	store = prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentItemContentPrefix)
+	contentStore := prefix.NewStore(base, types.DeploymentItemContentPrefix)
 	b = k.cdc.MustMarshal(item.GetContent())
-	store.Set(types.DeploymentItemKey(addr, name, path), b)
+	contentStore.Set(types.DeploymentItemKey(addr, name, path), b)
 }
 
 func (k Keeper) GetDataset(ctx sdk.Context, addr sdk.AccAddress, name string) (dataset *types.Dataset) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentItemMetaPrefix)
-	iterator := storetypes.KVStorePrefixIterator(store, types.DeploymentKey(addr, name))
-	defer iterator.Close()
+	base := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+
+	metaStore := prefix.NewStore(base, types.DeploymentItemMetaPrefix)
+	it := storetypes.KVStorePrefixIterator(metaStore, types.DeploymentKey(addr, name))
+	defer it.Close()
 
 	items := make([]*types.Item, 0)
-	for ; iterator.Valid(); iterator.Next() {
+	for ; it.Valid(); it.Next() {
 		var meta types.ItemMeta
-		k.cdc.MustUnmarshal(iterator.Value(), &meta)
+		k.cdc.MustUnmarshal(it.Value(), &meta)
 
-		store = prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentItemContentPrefix)
-		b := store.Get(types.DeploymentItemKey(addr, name, meta.GetPath()))
+		contentStore := prefix.NewStore(base, types.DeploymentItemContentPrefix)
+		b := contentStore.Get(types.DeploymentItemKey(addr, name, meta.GetPath()))
 		if b == nil {
 			continue
 		}
@@ -142,13 +155,12 @@ func (k Keeper) GetDataset(ctx sdk.Context, addr sdk.AccAddress, name string) (d
 		})
 	}
 
-	return &types.Dataset{
-		Items: items,
-	}
+	return &types.Dataset{Items: items}
 }
 
 func (k Keeper) GetMeta(ctx sdk.Context, addr sdk.AccAddress, name string) (meta types.Meta, found bool) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentMetaKeyPrefix)
+	base := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	store := prefix.NewStore(base, types.DeploymentMetaKeyPrefix)
 	b := store.Get(types.DeploymentKey(addr, name))
 	if b == nil {
 		return meta, false
@@ -159,7 +171,8 @@ func (k Keeper) GetMeta(ctx sdk.Context, addr sdk.AccAddress, name string) (meta
 }
 
 func (k Keeper) GetItemContent(ctx sdk.Context, addr sdk.AccAddress, name string, path string) (content types.ItemContent, found bool) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentItemContentPrefix)
+	base := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	store := prefix.NewStore(base, types.DeploymentItemContentPrefix)
 	b := store.Get(types.DeploymentItemKey(addr, name, path))
 	if b == nil {
 		return content, false
@@ -170,18 +183,18 @@ func (k Keeper) GetItemContent(ctx sdk.Context, addr sdk.AccAddress, name string
 }
 
 func (k Keeper) getDeploymentMetaStore(ctx sdk.Context) prefix.Store {
-	return prefix.NewStore(ctx.KVStore(k.storeKey), types.DeploymentMetaKeyPrefix)
+	base := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	return prefix.NewStore(base, types.DeploymentMetaKeyPrefix)
 }
 
 func (k Keeper) GetAllMeta(ctx sdk.Context) (metas []*types.Meta) {
-	store := ctx.KVStore(k.storeKey)
-	iterator := storetypes.KVStorePrefixIterator(store, types.DeploymentMetaKeyPrefix)
-	defer iterator.Close()
+	base := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	it := storetypes.KVStorePrefixIterator(base, types.DeploymentMetaKeyPrefix)
+	defer it.Close()
 
-	for ; iterator.Valid(); iterator.Next() {
+	for ; it.Valid(); it.Next() {
 		var meta types.Meta
-		k.cdc.MustUnmarshal(iterator.Value(), &meta)
-
+		k.cdc.MustUnmarshal(it.Value(), &meta)
 		metas = append(metas, &meta)
 	}
 

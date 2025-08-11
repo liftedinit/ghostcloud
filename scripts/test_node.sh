@@ -61,20 +61,21 @@ from_scratch () {
   # Gov
   update_test_genesis '.app_state["gov"]["params"]["min_deposit"]=[{"denom": "token","amount": "1000000"}]'
   update_test_genesis '.app_state["gov"]["params"]["voting_period"]="15s"'
+  update_test_genesis '.app_state["gov"]["params"]["expedited_voting_period"]="10s"'
 
   # Allocate genesis accounts
-  BINARY add-genesis-account $KEY 1000000token --keyring-backend $KEYRING
-  BINARY add-genesis-account $KEY2 100000token --keyring-backend $KEYRING
+  BINARY genesis add-genesis-account $KEY 1000000token --keyring-backend $KEYRING
+  BINARY genesis add-genesis-account $KEY2 100000token --keyring-backend $KEYRING
 
   # Set 1 POAToken -> user
   GenTxFlags="--commission-rate=0.0 --commission-max-rate=1.0 --commission-max-change-rate=0.1"
-  BINARY gentx $KEY 1000000token --keyring-backend $KEYRING --chain-id $CHAIN_ID $GenTxFlags
+  BINARY genesis gentx $KEY 1000000token --keyring-backend $KEYRING --chain-id $CHAIN_ID $GenTxFlags
 
   # Collect genesis tx
-  BINARY collect-gentxs --home=$HOME_DIR
+  BINARY genesis collect-gentxs --home=$HOME_DIR
 
   # Run this to ensure all worked and that the genesis file is setup correctly
-  BINARY validate-genesis
+  BINARY genesis validate
 }
 
 # check if CLEAN is not set to false

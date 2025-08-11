@@ -1,6 +1,8 @@
 package ghostcloud
 
 import (
+	"fmt"
+
 	"github.com/liftedinit/ghostcloud/x/ghostcloud/keeper"
 	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
@@ -14,13 +16,21 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		k.SetDeployment(ctx, addr, deployment.Meta, deployment.Dataset)
 	}
 	// this line is used by starport scaffolding # genesis/module/init
-	k.SetParams(ctx, genState.Params)
+	err := k.SetParams(ctx, genState.Params)
+	if err != nil {
+		fmt.Printf("Error setting ghostcloud params %+v", err)
+		panic(err)
+	}
 }
 
 // ExportGenesis returns the module's exported genesis
 func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	genesis := types.DefaultGenesis()
-	genesis.Params = k.GetParams(ctx)
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		panic(err)
+	}
+	genesis.Params = params
 
 	genesis.Deployments = keeper.GetAllDeployments(ctx, k)
 	// this line is used by starport scaffolding # genesis/module/export

@@ -1,6 +1,9 @@
 package types
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	"cosmossdk.io/collections"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 const (
 	// ModuleName defines the module name
@@ -21,11 +24,8 @@ var (
 	DeploymentItemKeyPrefix     = []byte{0x01}
 	DeploymentItemMetaPrefix    = []byte{DeploymentItemKeyPrefix[0], 0x00}
 	DeploymentItemContentPrefix = []byte{DeploymentItemKeyPrefix[0], 0x01}
+	ParamsKey                   = collections.NewPrefix(0x02)
 )
-
-func KeyPrefix(p string) []byte {
-	return []byte(p)
-}
 
 func DeploymentItemKey(
 	addr sdk.AccAddress,

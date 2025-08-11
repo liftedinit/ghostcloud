@@ -26,7 +26,10 @@ func validateCreateDeploymentRequest(msg *types.MsgCreateDeploymentRequest, para
 
 func (k msgServer) CreateDeployment(goCtx context.Context, msg *types.MsgCreateDeploymentRequest) (*types.MsgCreateDeploymentResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	params := k.GetParams(ctx)
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, err.Error())
+	}
 	if err := validateCreateDeploymentRequest(msg, params); err != nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, err.Error())
 	}

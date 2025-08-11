@@ -99,7 +99,8 @@ func testDeploymentMsgServerUpdateEmptyName(t *testing.T, k *keeper.Keeper, ctx 
 func testDeploymentMsgServerUpdateNameTooLong(t *testing.T, k *keeper.Keeper, ctx sdk.Context) {
 	keepertest.CreateAndSetNDeployments(ctx, k, 1, 3)
 	newMeta := sample.CreateMeta(0)
-	newMeta.Name = strings.Repeat("a", int(k.GetParams(ctx).MaxNameSize+1))
+	params, _ := k.GetParams(ctx)
+	newMeta.Name = strings.Repeat("a", int(params.MaxNameSize+1))
 	tc := keepertest.MsgServerTestCase{
 		Name:     "update_name_too_long",
 		Metas:    []*types.Meta{newMeta},
@@ -112,7 +113,8 @@ func testDeploymentMsgServerUpdateNameTooLong(t *testing.T, k *keeper.Keeper, ct
 func testDeploymentMsgServerUpdateDescriptionTooLong(t *testing.T, k *keeper.Keeper, ctx sdk.Context) {
 	keepertest.CreateAndSetNDeployments(ctx, k, 1, 3)
 	newMeta := sample.CreateMeta(0)
-	newMeta.Description = strings.Repeat("a", int(k.GetParams(ctx).MaxDescriptionSize+1))
+	params, _ := k.GetParams(ctx)
+	newMeta.Description = strings.Repeat("a", int(params.MaxDescriptionSize+1))
 	tc := keepertest.MsgServerTestCase{
 		Name:     "update_description_too_long",
 		Metas:    []*types.Meta{newMeta},
@@ -124,20 +126,20 @@ func testDeploymentMsgServerUpdateDescriptionTooLong(t *testing.T, k *keeper.Kee
 
 func testDeploymentMsgServerUpdatePayloadTooBig(t *testing.T, k *keeper.Keeper, ctx sdk.Context) {
 	keepertest.CreateAndSetNDeployments(ctx, k, 1, 3)
-	params := k.GetParams(ctx)
+	params, _ := k.GetParams(ctx)
 	newMeta, newPayload := sample.CreateRandomArchivePayload(1, params.MaxPayloadSize+1, "index.html")
 	tc := keepertest.MsgServerTestCase{
 		Name:     "update_payload_too_big",
 		Metas:    []*types.Meta{newMeta},
 		Payloads: []*types.Payload{newPayload},
-		Err:      fmt.Errorf(types.PayloadTooBig, newPayload.Size(), k.GetParams(ctx).MaxPayloadSize),
+		Err:      fmt.Errorf(types.PayloadTooBig, newPayload.Size(), params.MaxPayloadSize),
 	}
 	testDeploymentMsgServerUpdate(t, k, ctx, tc)
 }
 
 func testDeploymentMsgServerUpdateArchiveBomb(t *testing.T, k *keeper.Keeper, ctx sdk.Context) {
 	keepertest.CreateAndSetNDeployments(ctx, k, 1, 3)
-	params := k.GetParams(ctx)
+	params, _ := k.GetParams(ctx)
 	newMeta, newPayload := sample.CreateBombArchivePayload(1, params.MaxUncompressedSize+1, "index.html")
 	tc := keepertest.MsgServerTestCase{
 		Name:     "update_archive_bomb",
@@ -256,7 +258,7 @@ func testDeploymentMsgServerUpdateUnsupportedArchiveType(t *testing.T, k *keeper
 	metas, _ := keepertest.CreateAndSetNDeployments(ctx, k, 1, 1)
 	newPayload := &types.Payload{
 		PayloadOption: &types.Payload_Archive{
-			Archive: &types.Archive{Type: 123, Content: sample.CreateZip("index.html", "foobar")},
+			Archive: &types.Archive{ArchiveType: 123, Content: sample.CreateZip("index.html", "foobar")},
 		},
 	}
 	tc := keepertest.MsgServerTestCase{

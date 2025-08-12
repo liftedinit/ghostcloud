@@ -11,6 +11,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	accountkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 
 	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 )
@@ -22,6 +24,10 @@ type (
 		logger       log.Logger
 		Schema       collections.Schema
 		params       collections.Item[types.Params]
+
+		accountKeeper accountkeeper.AccountKeeper // for testing
+		bankKeeper    bankkeeper.Keeper           // for testing
+
 	}
 )
 
@@ -50,6 +56,22 @@ func NewKeeper(
 	k.Schema = schema
 
 	return k
+}
+
+func (k *Keeper) SetTestAccountKeeper(ak accountkeeper.AccountKeeper) {
+	k.accountKeeper = ak
+}
+
+func (k *Keeper) GetTestAccountKeeper() accountkeeper.AccountKeeper {
+	return k.accountKeeper
+}
+
+func (k *Keeper) SetTestBankKeeper(bk bankkeeper.Keeper) {
+	k.bankKeeper = bk
+}
+
+func (k *Keeper) GetTestBankKeeper() bankkeeper.Keeper {
+	return k.bankKeeper
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {

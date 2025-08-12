@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 
 	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/core/appmodule"
@@ -425,7 +426,7 @@ func New(
 		appCodec,
 		legacyAmino,
 		runtime.NewKVStoreService(keys[slashingtypes.StoreKey]),
-		app.StakingKeeper,                                        // implements types.StakingKeeper
+		app.StakingKeeper, // implements types.StakingKeeper
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(), // authority
 	)
 
@@ -548,11 +549,10 @@ func New(
 	govRouter.AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).
 		// This should be removed. It is still in place to avoid failures of modules that have not yet been upgraded.
 		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper))
-	app.GovKeeper.SetLegacyRouter(govRouter)
 
 	app.GovKeeper = *govKeeper.SetHooks(
 		govtypes.NewMultiGovHooks(
-			// register the governance hooks
+		// register the governance hooks
 		),
 	)
 
@@ -572,7 +572,11 @@ func New(
 		runtime.NewKVStoreService(keys[ghostcloudmoduletypes.StoreKey]),
 		logger,
 	)
+	app.GhostcloudKeeper.SetTestAccountKeeper(app.AccountKeeper)
+	app.GhostcloudKeeper.SetTestBankKeeper(app.BankKeeper)
 	ghostcloudModule := ghostcloudmodule.NewAppModule(appCodec, app.GhostcloudKeeper)
+
+	app.GovKeeper.SetLegacyRouter(govRouter)
 
 	/**** IBC Routing ****/
 
@@ -1046,6 +1050,17 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(ghostcloudmoduletypes.ModuleName)
 
 	return paramsKeeper
+}
+
+func (app *App) GetStoreKeys() []storetypes.StoreKey {
+	keys := make([]storetypes.StoreKey, 0, len(app.keys))
+	for _, key := range app.keys {
+		keys = append(keys, key)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i].Name() < keys[j].Name()
+	})
+	return keys
 }
 
 // SimulationManager returns the app SimulationManager

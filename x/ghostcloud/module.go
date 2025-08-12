@@ -6,6 +6,7 @@ import (
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	"cosmossdk.io/client/v2/autocli"
+	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	ghostcloudv1 "github.com/liftedinit/ghostcloud/api/liftedinit/ghostcloud/v1"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/liftedinit/ghostcloud/x/ghostcloud/client/cli"
 	"github.com/liftedinit/ghostcloud/x/ghostcloud/keeper"
+	"github.com/liftedinit/ghostcloud/x/ghostcloud/simulation"
 	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -160,3 +162,21 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 
 // ConsensusVersion is a sequence number for state-breaking change of the module. It should be incremented on each consensus-breaking change introduced by the module. To avoid wrong/empty versions, the initial version should be set to 1
 func (AppModule) ConsensusVersion() uint64 { return ConsensusVersion }
+
+func (AppModule) GenerateGenesisState(_ *module.SimulationState) {
+}
+
+// ProposalMsgs returns msgs used for governance proposals for simulations.
+func (AppModule) ProposalMsgs(_ module.SimulationState) []simtypes.WeightedProposalMsg {
+	return simulation.ProposalMsgs()
+}
+
+// RegisterStoreDecoder registers a decoder for distribution module's types
+func (am AppModule) RegisterStoreDecoder(sdr simtypes.StoreDecoderRegistry) {
+	sdr[types.StoreKey] = simtypes.NewStoreDecoderFuncFromCollectionsSchema(am.keeper.Schema)
+}
+
+// WeightedOperations returns the all the gov module operations with their respective weights.
+func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
+	return simulation.WeightedOperations(simState.AppParams, simState.Cdc, simState.TxConfig, am.keeper)
+}

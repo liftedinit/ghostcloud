@@ -16,8 +16,8 @@ func TestGetParams(t *testing.T) {
 	err := k.SetParams(ctx, params)
 	require.NoError(t, err)
 
-	params, err = k.GetParams(ctx)
+	kParams, err := k.GetParams(ctx)
 	require.NoError(t, err)
 
-	require.EqualValues(t, params, params)
+	require.EqualValues(t, kParams, params)
 }

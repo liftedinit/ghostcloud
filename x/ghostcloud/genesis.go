@@ -1,8 +1,6 @@
 package ghostcloud
 
 import (
-	"fmt"
-
 	"github.com/liftedinit/ghostcloud/x/ghostcloud/keeper"
 	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
 
@@ -18,7 +16,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 	// this line is used by starport scaffolding # genesis/module/init
 	err := k.SetParams(ctx, genState.Params)
 	if err != nil {
-		fmt.Printf("Error setting ghostcloud params %+v", err)
+		ctx.Logger().Error("Error setting ghostcloud params", "error", err)
 		panic(err)
 	}
 }

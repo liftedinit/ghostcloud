@@ -49,7 +49,7 @@ from_scratch () {
   # gc1efd63aw40lxf3n4mhf7dzhjkr453axurdehhc6
   echo "wealth flavor believe regret funny network recall kiss grape useless pepper cram hint member few certain unveil rather brick bargain curious require crowd raise" | BINARY keys add $KEY2 --keyring-backend $KEYRING --algo $KEYALGO --recover
 
-  BINARY init $MONIKER --chain-id $CHAIN_ID --default-denom=token
+  BINARY init $MONIKER --chain-id $CHAIN_ID --default-denom=ugcx
 
   # Function updates the config based on a jq argument as a string
   update_test_genesis () {

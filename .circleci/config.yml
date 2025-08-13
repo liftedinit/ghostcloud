@@ -38,8 +38,8 @@ jobs:
       tag: *go_version
     steps:
       - checkout
-      - run: make vet
-#      - run: make govulncheck
+#      - run: make vet
+      - run: make govulncheck
   release:
     executor:
       name: go/default

@@ -156,6 +156,7 @@ func DefaultConfig(tb testing.TB) network.Config {
 				dbm.NewMemDB(),
 				nil,
 				true,
+				app.DefaultCommissionRateMinMax,
 				simtestutil.EmptyAppOptions{},
 				baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),
 				baseapp.SetMinGasPrices(val.GetAppConfig().MinGasPrices),

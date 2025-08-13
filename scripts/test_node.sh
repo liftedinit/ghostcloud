@@ -44,9 +44,9 @@ from_scratch () {
   # remove existing daemon.
   rm -rf $HOME_DIR && echo "Removed $HOME_DIR"
 
-  # gc1hj5fveer5cjtn4wd6wstzugjfdxzl0xp8ws9ct
+  # gc1hj5fveer5cjtn4wd6wstzugjfdxzl0xp3dyn3n
   echo "decorate bright ozone fork gallery riot bus exhaust worth way bone indoor calm squirrel merry zero scheme cotton until shop any excess stage laundry" | BINARY keys add $KEY --keyring-backend $KEYRING --algo $KEYALGO --recover
-  # gc1efd63aw40lxf3n4mhf7dzhjkr453axurm6rp3z
+  # gc1efd63aw40lxf3n4mhf7dzhjkr453axurdehhc6
   echo "wealth flavor believe regret funny network recall kiss grape useless pepper cram hint member few certain unveil rather brick bargain curious require crowd raise" | BINARY keys add $KEY2 --keyring-backend $KEYRING --algo $KEYALGO --recover
 
   BINARY init $MONIKER --chain-id $CHAIN_ID --default-denom=token
@@ -59,17 +59,24 @@ from_scratch () {
   # Block
   update_test_genesis '.consensus["params"]["block"]["max_gas"]="1000000000"'
   # Gov
-  update_test_genesis '.app_state["gov"]["params"]["min_deposit"]=[{"denom": "token","amount": "1000000"}]'
+  update_test_genesis '.app_state["gov"]["params"]["min_deposit"]=[{"denom": "ugcx","amount": "1000000"}]'
   update_test_genesis '.app_state["gov"]["params"]["voting_period"]="15s"'
   update_test_genesis '.app_state["gov"]["params"]["expedited_voting_period"]="10s"'
 
+  update_test_genesis '.app_state["staking"]["params"]["bond_denom"]="upoa"' # PoA Token
+  update_test_genesis '.app_state["staking"]["params"]["min_commission_rate"]="0.000000000000000000"'
+  # mint
+  update_test_genesis '.app_state["mint"]["params"]["mint_denom"]="ugcx"' # not used
+  update_test_genesis '.app_state["mint"]["params"]["blocks_per_year"]="6311520"'
+
+
   # Allocate genesis accounts
-  BINARY genesis add-genesis-account $KEY 1000000token --keyring-backend $KEYRING
-  BINARY genesis add-genesis-account $KEY2 100000token --keyring-backend $KEYRING
+  BINARY genesis add-genesis-account $KEY 1000000upoa,1000000ugcx --keyring-backend $KEYRING
+  BINARY genesis add-genesis-account $KEY2 100000ugcx --keyring-backend $KEYRING
 
   # Set 1 POAToken -> user
   GenTxFlags="--commission-rate=0.0 --commission-max-rate=1.0 --commission-max-change-rate=0.1"
-  BINARY genesis gentx $KEY 1000000token --keyring-backend $KEYRING --chain-id $CHAIN_ID $GenTxFlags
+  BINARY genesis gentx $KEY 1000000upoa --keyring-backend $KEYRING --chain-id $CHAIN_ID $GenTxFlags
 
   # Collect genesis tx
   BINARY genesis collect-gentxs --home=$HOME_DIR
@@ -116,6 +123,6 @@ sed -i 's/address = ":8080"/address = "0.0.0.0:'$ROSETTA'"/g' $HOME_DIR/config/a
 sed -i 's/timeout_commit = "5s"/timeout_commit = "'$TIMEOUT_COMMIT'"/g' $HOME_DIR/config/config.toml
 
 # Start the node
-BINARY start --pruning=nothing  --minimum-gas-prices=0.000000025token --rpc.laddr="tcp://0.0.0.0:$RPC"
+BINARY start --pruning=nothing  --minimum-gas-prices=0.000000025ugcx --rpc.laddr="tcp://0.0.0.0:$RPC"
 #cosmovisor init $(which $BINARY)
 #cosmovisor run start --pruning=nothing  --minimum-gas-prices=0umfx --rpc.laddr="tcp://0.0.0.0:$RPC" --home $HOME_DIR

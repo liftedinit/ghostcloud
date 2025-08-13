@@ -155,7 +155,7 @@ func validatePayload(payload *types.Payload, params types.Params) error {
 			return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "archive cannot be nil")
 		}
 		if err := verifyArchiveContent(archive.Content, params.MaxUncompressedSize); err != nil {
-			return errorsmod.Wrapf(sdkerrors.ErrInvalidRequest, err.Error())
+			return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, err.Error())
 		}
 	case *types.Payload_Dataset:
 		dataset := payload.GetDataset()
@@ -163,7 +163,7 @@ func validatePayload(payload *types.Payload, params types.Params) error {
 			return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "dataset cannot be nil")
 		}
 		if err := verifyDatasetContent(dataset); err != nil {
-			return errorsmod.Wrapf(sdkerrors.ErrInvalidRequest, err.Error())
+			return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, err.Error())
 		}
 	}
 	return nil

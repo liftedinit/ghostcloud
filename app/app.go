@@ -13,6 +13,7 @@ import (
 	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/x/circuit"
 	"cosmossdk.io/x/evidence"
 	"cosmossdk.io/x/feegrant"
@@ -44,6 +45,7 @@ import (
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 	ibctm "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
+	"github.com/liftedinit/ghostcloud/app/helpers"
 	"github.com/spf13/cast"
 
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting"
@@ -127,6 +129,15 @@ import (
 	ibcfeetypes "github.com/cosmos/ibc-go/v8/modules/apps/29-fee/types"
 	porttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
 
+	"github.com/strangelove-ventures/poa"
+	poatypes "github.com/strangelove-ventures/poa"
+	poakeeper "github.com/strangelove-ventures/poa/keeper"
+	poamodule "github.com/strangelove-ventures/poa/module"
+
+	manifest "github.com/liftedinit/manifest-ledger/x/manifest"
+	manifestkeeper "github.com/liftedinit/manifest-ledger/x/manifest/keeper"
+	manifesttypes "github.com/liftedinit/manifest-ledger/x/manifest/types"
+
 	ghostcloudmodule "github.com/liftedinit/ghostcloud/x/ghostcloud"
 	ghostcloudmodulekeeper "github.com/liftedinit/ghostcloud/x/ghostcloud/keeper"
 	ghostcloudmoduletypes "github.com/liftedinit/ghostcloud/x/ghostcloud/types"
@@ -139,6 +150,10 @@ const (
 )
 
 var (
+	DefaultCommissionRateMinMax = RateMinMax{
+		Floor: sdkmath.LegacyZeroDec(),
+		Ceil:  sdkmath.LegacyZeroDec(),
+	}
 	// Bech32PrefixAccAddr defines the Bech32 prefix of an account's address
 	Bech32PrefixAccAddr = Bech32Prefix
 	// Bech32PrefixAccPub defines the Bech32 prefix of an account's public key
@@ -167,6 +182,7 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		manifesttypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 )
@@ -233,6 +249,8 @@ type App struct {
 	ICAControllerKeeper icacontrollerkeeper.Keeper
 	ICAHostKeeper       icahostkeeper.Keeper
 	TransferKeeper      ibctransferkeeper.Keeper
+	POAKeeper           poakeeper.Keeper
+	ManifestKeeper      manifestkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper           capabilitykeeper.ScopedKeeper
@@ -259,6 +277,7 @@ func New(
 	db dbm.DB,
 	traceStore io.Writer,
 	loadLatest bool,
+	commissionRateMinMax RateMinMax,
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *App {
@@ -318,6 +337,8 @@ func New(
 		group.StoreKey,
 		icacontrollertypes.StoreKey,
 		consensusparamtypes.StoreKey,
+		poa.StoreKey,
+		manifesttypes.StoreKey,
 		ghostcloudmoduletypes.StoreKey,
 	)
 	tkeys := storetypes.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -348,7 +369,7 @@ func New(
 	// initialize the consensus parameters keeper (the app will use it in BeginBlock)
 	app.ConsensusParamsKeeper = consensusparamkeeper.NewKeeper(appCodec,
 		runtime.NewKVStoreService(keys[consensusparamtypes.StoreKey]),
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		helpers.GetPoAAdmin(),
 		runtime.EventService{},
 	)
 	bApp.SetParamStore(app.ConsensusParamsKeeper.ParamsStore)
@@ -380,7 +401,7 @@ func New(
 		maccPerms,
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix()),
 		sdk.GetConfig().GetBech32AccountAddrPrefix(),
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		helpers.GetPoAAdmin(),
 	)
 
 	app.BankKeeper = bankkeeper.NewBaseKeeper(
@@ -388,7 +409,7 @@ func New(
 		runtime.NewKVStoreService(keys[banktypes.StoreKey]),
 		app.AccountKeeper,
 		app.BlockedModuleAccountAddrs(),
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		helpers.GetPoAAdmin(),
 		logger,
 	)
 
@@ -397,7 +418,7 @@ func New(
 		runtime.NewKVStoreService(keys[stakingtypes.StoreKey]),
 		app.AccountKeeper,
 		app.BankKeeper,
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		helpers.GetPoAAdmin(),
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ValidatorAddrPrefix()),
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ConsensusAddrPrefix()),
 	)
@@ -409,7 +430,7 @@ func New(
 		app.AccountKeeper,
 		app.BankKeeper,
 		authtypes.FeeCollectorName,
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		helpers.GetPoAAdmin(),
 	)
 
 	app.DistrKeeper = distrkeeper.NewKeeper(
@@ -419,16 +440,27 @@ func New(
 		app.BankKeeper,
 		app.StakingKeeper,
 		authtypes.FeeCollectorName,
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		helpers.GetPoAAdmin(),
 	)
 
 	app.SlashingKeeper = slashingkeeper.NewKeeper(
 		appCodec,
 		legacyAmino,
 		runtime.NewKVStoreService(keys[slashingtypes.StoreKey]),
-		app.StakingKeeper, // implements types.StakingKeeper
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(), // authority
+		app.StakingKeeper,     // implements types.StakingKeeper
+		helpers.GetPoAAdmin(), // authority
 	)
+
+	app.POAKeeper = poakeeper.NewKeeper(
+		appCodec,
+		runtime.NewKVStoreService(keys[poatypes.StoreKey]),
+		app.StakingKeeper,
+		app.SlashingKeeper,
+		app.BankKeeper,
+		logger,
+		helpers.GetPoAAdmin(),
+	)
+	app.POAKeeper.SetTestAccountKeeper(app.AccountKeeper)
 
 	groupConfig := group.DefaultConfig()
 	app.GroupKeeper = groupkeeper.NewKeeper(
@@ -445,7 +477,7 @@ func New(
 		appCodec,
 		homePath,
 		app.BaseApp,
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		helpers.GetPoAAdmin(),
 	)
 
 	invCheckPeriod := cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod))
@@ -455,7 +487,7 @@ func New(
 		invCheckPeriod,
 		app.BankKeeper,
 		authtypes.FeeCollectorName,
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		helpers.GetPoAAdmin(),
 		app.AccountKeeper.AddressCodec(),
 	)
 
@@ -464,7 +496,7 @@ func New(
 	app.CircuitKeeper = circuitkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[circuittypes.StoreKey]),
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		helpers.GetPoAAdmin(),
 		app.AccountKeeper.AddressCodec(),
 	)
 	app.BaseApp.SetCircuitBreaker(&app.CircuitKeeper)
@@ -483,7 +515,7 @@ func New(
 		app.StakingKeeper,
 		app.UpgradeKeeper,
 		scopedIBCKeeper,
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		helpers.GetPoAAdmin(),
 	)
 
 	app.IBCFeeKeeper = ibcfeekeeper.NewKeeper(
@@ -502,7 +534,7 @@ func New(
 		app.IBCKeeper.PortKeeper,
 		scopedICAControllerKeeper,
 		app.MsgServiceRouter(),
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		helpers.GetPoAAdmin(),
 	)
 
 	// Create Transfer Keepers
@@ -516,7 +548,7 @@ func New(
 		app.AccountKeeper,
 		app.BankKeeper,
 		scopedTransferKeeper,
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		helpers.GetPoAAdmin(),
 	)
 
 	app.ICAHostKeeper = icahostkeeper.NewKeeper(
@@ -528,7 +560,7 @@ func New(
 		app.AccountKeeper,
 		scopedICAHostKeeper,
 		app.MsgServiceRouter(),
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		helpers.GetPoAAdmin(),
 	)
 	app.ICAHostKeeper.WithQueryRouter(app.GRPCQueryRouter())
 
@@ -542,7 +574,7 @@ func New(
 		app.DistrKeeper,
 		app.MsgServiceRouter(),
 		govConfig,
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		helpers.GetPoAAdmin(),
 	)
 
 	govRouter := govv1beta1.NewRouter()
@@ -552,7 +584,7 @@ func New(
 
 	app.GovKeeper = *govKeeper.SetHooks(
 		govtypes.NewMultiGovHooks(
-		// register the governance hooks
+			// register the governance hooks
 		),
 	)
 
@@ -566,6 +598,17 @@ func New(
 	)
 	// If evidence needs to be handled for the app, set routes in router here and seal
 	app.EvidenceKeeper = *evidenceKeeper
+
+	// Create the manifest Keeper
+	app.ManifestKeeper = manifestkeeper.NewKeeper(
+		appCodec,
+		runtime.NewKVStoreService(keys[manifesttypes.StoreKey]),
+		app.MintKeeper,
+		app.BankKeeper,
+		logger,
+		helpers.GetPoAAdmin(),
+	)
+	app.ManifestKeeper.SetTestAccountKeeper(app.AccountKeeper)
 
 	app.GhostcloudKeeper = ghostcloudmodulekeeper.NewKeeper(
 		appCodec,
@@ -659,6 +702,8 @@ func New(
 		ibcfee.NewAppModule(app.IBCFeeKeeper),
 		ica.NewAppModule(&app.ICAControllerKeeper, &app.ICAHostKeeper),
 		ibctm.NewAppModule(),
+		poamodule.NewAppModule(appCodec, app.POAKeeper),
+		manifest.NewAppModule(appCodec, app.ManifestKeeper, app.MintKeeper),
 
 		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)),
 
@@ -687,10 +732,12 @@ func New(
 
 	// Set BeginBlocker order
 	app.mm.SetOrderBeginBlockers(
-		minttypes.ModuleName,
+		//minttypes.ModuleName,
+		manifesttypes.ModuleName, // minter to stakeholders
 		distrtypes.ModuleName,
 		slashingtypes.ModuleName,
 		evidencetypes.ModuleName,
+		poa.ModuleName, // before staking
 		stakingtypes.ModuleName,
 		genutiltypes.ModuleName,
 		authz.ModuleName,
@@ -707,7 +754,7 @@ func New(
 	app.mm.SetOrderEndBlockers(
 		crisistypes.ModuleName,
 		govtypes.ModuleName,
-		minttypes.ModuleName,
+		poa.ModuleName, // before staking
 		stakingtypes.ModuleName,
 		genutiltypes.ModuleName,
 		feegrant.ModuleName,
@@ -717,6 +764,7 @@ func New(
 		ibctransfertypes.ModuleName,
 		ibcexported.ModuleName,
 		icatypes.ModuleName,
+		manifesttypes.ModuleName, // minter to stakeholders
 		ghostcloudmoduletypes.ModuleName,
 	)
 
@@ -746,6 +794,8 @@ func New(
 		ibcexported.ModuleName,
 		icatypes.ModuleName,
 		ibcfeetypes.ModuleName,
+		poa.ModuleName,
+		manifesttypes.ModuleName,
 		ghostcloudmoduletypes.ModuleName,
 	}
 	app.mm.SetOrderInitGenesis(genesisModuleOrder...)
@@ -786,19 +836,7 @@ func New(
 	app.MountMemoryStores(memKeys)
 
 	// initialize BaseApp
-	anteHandler, err := ante.NewAnteHandler(
-		ante.HandlerOptions{
-			AccountKeeper:   app.AccountKeeper,
-			BankKeeper:      app.BankKeeper,
-			SignModeHandler: txConfig.SignModeHandler(),
-			SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
-		},
-	)
-	if err != nil {
-		panic(fmt.Errorf("failed to create AnteHandler: %w", err))
-	}
-
-	app.SetAnteHandler(anteHandler)
+	app.setAnteHandler(txConfig, commissionRateMinMax)
 	app.SetInitChainer(app.InitChainer)
 	app.SetPreBlocker(app.PreBlocker)
 	app.SetBeginBlocker(app.BeginBlocker)
@@ -830,6 +868,27 @@ func New(
 	}
 
 	return app
+}
+
+func (app *App) setAnteHandler(txConfig client.TxConfig, commissionRateMinMax RateMinMax) {
+	anteHandler, err := NewAnteHandler(
+		HandlerOptions{
+			HandlerOptions: ante.HandlerOptions{
+				AccountKeeper:   app.AccountKeeper,
+				BankKeeper:      app.BankKeeper,
+				SignModeHandler: txConfig.SignModeHandler(),
+				FeegrantKeeper:  app.FeeGrantKeeper,
+				SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
+			},
+			IBCKeeper:     app.IBCKeeper,
+			CircuitKeeper: &app.CircuitKeeper,
+			RateMinMax:    commissionRateMinMax,
+		},
+	)
+	if err != nil {
+		panic(fmt.Errorf("failed to create AnteHandler: %s", err))
+	}
+	app.SetAnteHandler(anteHandler)
 }
 
 func (app *App) setPostHandler() {
@@ -1047,6 +1106,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(ibcexported.ModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
+	paramsKeeper.Subspace(manifesttypes.ModuleName)
 	paramsKeeper.Subspace(ghostcloudmoduletypes.ModuleName)
 
 	return paramsKeeper

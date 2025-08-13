@@ -48,7 +48,7 @@ func NewRootCmd() *cobra.Command {
 	cfg.SetBech32PrefixForConsensusNode(app.Bech32PrefixConsAddr, app.Bech32PrefixConsPub)
 	cfg.Seal()
 
-	tempApp := app.New(log.NewNopLogger(), dbm.NewMemDB(), nil, true, simtestutil.NewAppOptionsWithFlagHome(tempDir()))
+	tempApp := app.New(log.NewNopLogger(), dbm.NewMemDB(), nil, true, app.DefaultCommissionRateMinMax, simtestutil.NewAppOptionsWithFlagHome(tempDir()))
 	encodingConfig := appparams.EncodingConfig{
 		InterfaceRegistry: tempApp.InterfaceRegistry(),
 		Codec:             tempApp.AppCodec(),
@@ -291,6 +291,7 @@ func newApp(
 
 	return app.New(
 		logger, db, traceStore, true,
+		app.DefaultCommissionRateMinMax,
 		appOpts,
 		baseappOptions...,
 	)
@@ -324,14 +325,15 @@ func appExport(
 	viperAppOpts.Set(server.FlagInvCheckPeriod, 1)
 	appOpts = viperAppOpts
 
+	// TODO: Non-default commission rate min/max
 	if height != -1 {
-		chainApp = app.New(logger, db, traceStore, false, appOpts)
+		chainApp = app.New(logger, db, traceStore, false, app.DefaultCommissionRateMinMax, appOpts)
 
 		if err := chainApp.LoadHeight(height); err != nil {
 			return servertypes.ExportedApp{}, err
 		}
 	} else {
-		chainApp = app.New(logger, db, traceStore, true, appOpts)
+		chainApp = app.New(logger, db, traceStore, true, app.DefaultCommissionRateMinMax, appOpts)
 	}
 
 	return chainApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)

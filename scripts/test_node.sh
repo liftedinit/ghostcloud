@@ -51,6 +51,11 @@ from_scratch () {
 
   BINARY init $MONIKER --chain-id $CHAIN_ID --default-denom=ugcx
 
+#  # Merge exported Ghostcloud data, e.g., from a CosmosSDK 0.47 version, into the genesis file
+#  # This assumes you have exported the genesis ghostcloud module from Ghostcloud and saved it as [EXPORTED_JSON]
+#  jq -s '.[0] as $new | .[1] as $exp | $new | .app_state.ghostcloud = $exp.app_state.ghostcloud' ${HOME_DIR}/config/genesis.json [EXPORTED_JSON] > merged.json
+#  mv merged.json ${HOME_DIR}/config/genesis.json
+
   # Function updates the config based on a jq argument as a string
   update_test_genesis () {
     cat $HOME_DIR/config/genesis.json | jq "$1" > $HOME_DIR/config/tmp_genesis.json && mv $HOME_DIR/config/tmp_genesis.json $HOME_DIR/config/genesis.json

@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	dbm "github.com/cosmos/cosmos-db"
+
 	"github.com/liftedinit/ghostcloud/testutil/keeper"
 	"github.com/liftedinit/ghostcloud/testutil/sample"
 	"github.com/liftedinit/ghostcloud/x/ghostcloud/types"
@@ -18,14 +20,13 @@ import (
 
 	"github.com/liftedinit/ghostcloud/app"
 
-	tmdb "github.com/cometbft/cometbft-db"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 
+	pruningtypes "cosmossdk.io/store/pruning/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	pruningtypes "github.com/cosmos/cosmos-sdk/store/pruning/types"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	cosmosnetwork "github.com/cosmos/cosmos-sdk/testutil/network"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
@@ -87,7 +88,7 @@ func SetupQueryCommonFlags(t *testing.T) []string {
 }
 
 func Setup(t *testing.T) *Context {
-	return setupCommon(t, DefaultConfig())
+	return setupCommon(t, DefaultConfig(t))
 }
 
 func SetupWithDeployments(t *testing.T, n int) (*Context, []*types.Deployment) {
@@ -97,7 +98,7 @@ func SetupWithDeployments(t *testing.T, n int) (*Context, []*types.Deployment) {
 
 func SetupWithDeploymentsAndAddr(t *testing.T, n int, addr string) (*Context, []*types.Deployment) {
 	t.Helper()
-	cfg := DefaultConfig()
+	cfg := DefaultConfig(t)
 	state := types.GenesisState{
 		Params:      types.DefaultParams(),
 		Deployments: sample.CreateNDeploymentsWithAddr(addr, n, keeper.DATASET_SIZE),
@@ -118,10 +119,11 @@ func New(t *testing.T, configs ...Config) *Network {
 	}
 	var cfg network.Config
 	if len(configs) == 0 {
-		cfg = DefaultConfig()
+		cfg = DefaultConfig(t)
 	} else {
 		cfg = configs[0]
 	}
+
 	net, err := network.New(t, t.TempDir(), cfg)
 	require.NoError(t, err)
 	_, err = net.WaitForHeight(1)
@@ -132,13 +134,19 @@ func New(t *testing.T, configs ...Config) *Network {
 
 // DefaultConfig will initialize config for the network with custom application,
 // genesis and single validator. All other parameters are inherited from cosmos-sdk/testutil/network.DefaultConfig
-func DefaultConfig() network.Config {
+func DefaultConfig(tb testing.TB) network.Config {
 	var (
-		encoding = app.MakeEncodingConfig()
+		encoding = app.MakeEncodingConfig(tb)
 		chainID  = "chain-" + tmrand.NewRand().Str(6)
 	)
+
+	genesisData := app.NewDefaultGenesisState(tb)
+
+	//b, _ := json.MarshalIndent(genesisData, "", "  ")
+	//fmt.Printf("genesis data %s\n", string(b))
+
 	return network.Config{
-		Codec:             encoding.Marshaler,
+		Codec:             encoding.Codec,
 		TxConfig:          encoding.TxConfig,
 		LegacyAmino:       encoding.Amino,
 		InterfaceRegistry: encoding.InterfaceRegistry,
@@ -146,20 +154,17 @@ func DefaultConfig() network.Config {
 		AppConstructor: func(val network.ValidatorI) servertypes.Application {
 			return app.New(
 				val.GetCtx().Logger,
-				tmdb.NewMemDB(),
+				dbm.NewMemDB(),
 				nil,
 				true,
-				map[int64]bool{},
-				val.GetCtx().Config.RootDir,
-				0,
-				encoding,
+				app.DefaultCommissionRateMinMax,
 				simtestutil.EmptyAppOptions{},
 				baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),
 				baseapp.SetMinGasPrices(val.GetAppConfig().MinGasPrices),
 				baseapp.SetChainID(chainID),
 			)
 		},
-		GenesisState:    app.ModuleBasics.DefaultGenesis(encoding.Marshaler),
+		GenesisState:    genesisData,
 		TimeoutCommit:   2 * time.Second,
 		ChainID:         chainID,
 		NumValidators:   1,

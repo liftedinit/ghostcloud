@@ -81,7 +81,7 @@ func testDeploymentMsgServerCreateValidArchive(t *testing.T, k *keeper.Keeper, c
 }
 
 func testDeploymentMsgServerCreateArchiveTooBig(t *testing.T, k *keeper.Keeper, ctx sdk.Context) {
-	params := k.GetParams(ctx)
+	params, _ := k.GetParams(ctx)
 	meta, payload := sample.CreateRandomArchivePayload(1, params.MaxPayloadSize+1, "index.html")
 	tc := keepertest.MsgServerTestCase{
 		Name:     "a_too_big",
@@ -104,7 +104,7 @@ func testDeploymentMsgServerArchiveNoIndex(t *testing.T, k *keeper.Keeper, ctx s
 }
 
 func testDeploymentMsgServerNameTooLong(t *testing.T, k *keeper.Keeper, ctx sdk.Context) {
-	params := k.GetParams(ctx)
+	params, _ := k.GetParams(ctx)
 	meta, payload := sample.CreateNDatasetPayloadsWithIndexHtml(1, keepertest.DATASET_SIZE)
 	meta[0].Name = strings.Repeat("a", int(params.MaxNameSize+1))
 	tc := keepertest.MsgServerTestCase{
@@ -141,7 +141,7 @@ func testDeploymentMsgCreateServerEmptyCreator(t *testing.T, k *keeper.Keeper, c
 }
 
 func testDeploymentMsgCreateServerDescriptionTooLong(t *testing.T, k *keeper.Keeper, ctx sdk.Context) {
-	params := k.GetParams(ctx)
+	params, _ := k.GetParams(ctx)
 	meta, payload := sample.CreateNDatasetPayloadsWithIndexHtml(1, keepertest.DATASET_SIZE)
 	meta[0].Description = strings.Repeat("a", int(params.MaxDescriptionSize+1))
 	tc := keepertest.MsgServerTestCase{
@@ -200,7 +200,7 @@ func testDeploymentMsgCreateServerEmptyDatasetPayload(t *testing.T, k *keeper.Ke
 }
 
 func testDeploymentMsgCreateServerArchiveBombPayload(t *testing.T, k *keeper.Keeper, ctx sdk.Context) {
-	params := k.GetParams(ctx)
+	params, _ := k.GetParams(ctx)
 	meta, payload := sample.CreateBombArchivePayload(1, params.MaxUncompressedSize+1, "index.html")
 	tc := keepertest.MsgServerTestCase{
 		Name:     "a_bomb",
@@ -215,7 +215,7 @@ func testDeploymentMsgCreateServerInvalidArchiveType(t *testing.T, k *keeper.Kee
 	meta := sample.CreateMeta(0)
 	payload := &types.Payload{
 		PayloadOption: &types.Payload_Archive{
-			Archive: &types.Archive{Type: 123, Content: sample.CreateZip("index.html", "foobar")},
+			Archive: &types.Archive{ArchiveType: 123, Content: sample.CreateZip("index.html", "foobar")},
 		},
 	}
 	tc := keepertest.MsgServerTestCase{

@@ -1,19 +1,27 @@
 syntax = "proto3";
-package ghostcloud.ghostcloud;
+package liftedinit.ghostcloud.v1;
 
-import "ghostcloud/ghostcloud/meta.proto";
-import "ghostcloud/ghostcloud/payload.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "amino/amino.proto";
+import "liftedinit/ghostcloud/v1/meta.proto";
+import "liftedinit/ghostcloud/v1/payload.proto";
 
 option go_package = "github.com/liftedinit/ghostcloud/x/ghostcloud/types";
 
 // Msg defines the Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
+
   rpc CreateDeployment(MsgCreateDeploymentRequest) returns (MsgCreateDeploymentResponse);
   rpc UpdateDeployment(MsgUpdateDeploymentRequest) returns (MsgUpdateDeploymentResponse);
   rpc RemoveDeployment(MsgRemoveDeploymentRequest) returns (MsgRemoveDeploymentResponse);
 }
 
 message MsgCreateDeploymentRequest {
+  option (cosmos.msg.v1.signer) = "meta";
+  option (amino.name) = "lifted/ghostcloud/MsgCreateDeployment";
+
   Meta meta = 1;
   Payload payload = 2;
 }
@@ -21,6 +29,9 @@ message MsgCreateDeploymentRequest {
 message MsgCreateDeploymentResponse {}
 
 message MsgUpdateDeploymentRequest {
+  option (cosmos.msg.v1.signer) = "meta";
+  option (amino.name) = "lifted/ghostcloud/MsgUpdateDeployment";
+
   Meta meta = 1;
   Payload payload = 2;
 }
@@ -28,7 +39,10 @@ message MsgUpdateDeploymentRequest {
 message MsgUpdateDeploymentResponse {}
 
 message MsgRemoveDeploymentRequest {
-  string creator = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "lifted/ghostcloud/MsgRemoveDeployment";
+
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string name = 2;
 }
 

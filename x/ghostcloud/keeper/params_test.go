@@ -13,7 +13,11 @@ func TestGetParams(t *testing.T) {
 	k, ctx := testkeeper.GhostcloudKeeper(t)
 	params := types.DefaultParams()
 
-	k.SetParams(ctx, params)
+	err := k.SetParams(ctx, params)
+	require.NoError(t, err)
 
-	require.EqualValues(t, params, k.GetParams(ctx))
+	kParams, err := k.GetParams(ctx)
+	require.NoError(t, err)
+
+	require.EqualValues(t, kParams, params)
 }

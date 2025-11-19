@@ -27,6 +27,7 @@ func runCreateTxTest(t *testing.T, nc *network.Context, tc *network.TxTestCase) 
 
 			var resp sdk.TxResponse
 			require.NoError(t, nc.Ctx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+			t.Log("Response:", resp)
 			require.NoError(t, clitestutil.CheckTxCode(nc.Net, nc.Ctx, resp.TxHash, tc.Code))
 		} else {
 			require.Error(t, err)

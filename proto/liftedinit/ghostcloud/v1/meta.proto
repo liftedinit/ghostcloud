@@ -1,11 +1,14 @@
 syntax = "proto3";
-package ghostcloud.ghostcloud;
+package liftedinit.ghostcloud.v1;
 
+import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/liftedinit/ghostcloud/x/ghostcloud/types";
 
 message Meta {
+  option (cosmos.msg.v1.signer) = "creator";
+
   string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string name = 2;
   string description = 3;

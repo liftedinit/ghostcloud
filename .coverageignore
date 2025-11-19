@@ -1,3 +1,4 @@
 *.pb.go
 *.pb.gw.go
-*_simulation.go
+*.pulsar.go
+testnet.go

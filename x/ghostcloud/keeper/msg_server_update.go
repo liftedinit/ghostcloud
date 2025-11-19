@@ -24,9 +24,12 @@ func validateUpdateDeploymentRequest(msg *types.MsgUpdateDeploymentRequest, para
 
 func (k msgServer) UpdateDeployment(goCtx context.Context, msg *types.MsgUpdateDeploymentRequest) (*types.MsgUpdateDeploymentResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	params := k.GetParams(ctx)
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, err.Error())
+	}
 
-	err := validateUpdateDeploymentRequest(msg, params)
+	err = validateUpdateDeploymentRequest(msg, params)
 	if err != nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, err.Error())
 	}

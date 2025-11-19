@@ -112,8 +112,8 @@ func createArchivePayload(path string) (*types.Payload, error) {
 	return &types.Payload{
 		PayloadOption: &types.Payload_Archive{
 			Archive: &types.Archive{
-				Type:    types.ArchiveType_Zip,
-				Content: data,
+				ArchiveType: types.ArchiveType_Zip,
+				Content:     data,
 			},
 		},
 	}, nil

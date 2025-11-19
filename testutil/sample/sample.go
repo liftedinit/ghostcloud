@@ -127,8 +127,8 @@ func CreateRandomArchivePayload(i int, size int64, name string) (*types.Meta, *t
 	}
 	return CreateMeta(i), &types.Payload{
 		PayloadOption: &types.Payload_Archive{Archive: &types.Archive{
-			Type:    types.ArchiveType_Zip,
-			Content: CreateZip(name, string(body)),
+			ArchiveType: types.ArchiveType_Zip,
+			Content:     CreateZip(name, string(body)),
 		}},
 	}
 }
@@ -136,8 +136,8 @@ func CreateRandomArchivePayload(i int, size int64, name string) (*types.Meta, *t
 func CreateBombArchivePayload(i int, size uint64, name string) (*types.Meta, *types.Payload) {
 	return CreateMeta(i), &types.Payload{
 		PayloadOption: &types.Payload_Archive{Archive: &types.Archive{
-			Type:    types.ArchiveType_Zip,
-			Content: CreateZip(name, strings.Repeat("a", int(size))),
+			ArchiveType: types.ArchiveType_Zip,
+			Content:     CreateZip(name, strings.Repeat("a", int(size))),
 		}},
 	}
 }
@@ -206,8 +206,8 @@ func CreateDatasetWithIndexHtml(n int) *types.Dataset {
 
 func CreateArchive() *types.Archive {
 	return &types.Archive{
-		Type:    types.ArchiveType_Zip,
-		Content: CreateZip("index.html", HelloWorldHTMLBody),
+		ArchiveType: types.ArchiveType_Zip,
+		Content:     CreateZip("index.html", HelloWorldHTMLBody),
 	}
 }
 

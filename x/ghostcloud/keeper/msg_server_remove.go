@@ -21,7 +21,10 @@ func validateRemoveDeploymentRequest(msg *types.MsgRemoveDeploymentRequest, para
 }
 func (k msgServer) RemoveDeployment(goCtx context.Context, msg *types.MsgRemoveDeploymentRequest) (*types.MsgRemoveDeploymentResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	params := k.GetParams(ctx)
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, err.Error())
+	}
 	if err := validateRemoveDeploymentRequest(msg, params); err != nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, err.Error())
 	}

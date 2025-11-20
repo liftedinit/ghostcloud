@@ -3,11 +3,11 @@
 version: 2.1
 
 GO_VERSION: &go_version '1.25.4'
-GORELEASER_VERSION: &goreleaser_version 'v1.23.0'
+GORELEASER_VERSION: &goreleaser_version 'v2.12.7'
 
 orbs:
-  go: circleci/go@1.10.0
-  codecov: codecov/codecov@3.3.0
+  go: circleci/go@3.0.3
+  codecov: codecov/codecov@5.4.3
 
 jobs:
   build:

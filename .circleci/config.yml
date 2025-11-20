@@ -22,7 +22,7 @@ jobs:
       - run: make coverage
       - codecov/upload:
           disable_search: true
-          files: coverage-filtered.out
+          files: /tmp/ghostcloud-coverage/coverage-merged-filtered.out
       - go/install-goreleaser:
           version: *goreleaser_version
       - run: goreleaser release --snapshot --clean

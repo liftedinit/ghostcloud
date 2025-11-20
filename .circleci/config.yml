@@ -21,7 +21,6 @@ jobs:
       - go/save-mod-cache
       - run: make coverage
       - codecov/upload:
-          token: $CODECOV_TOKEN
           disable_search: true
           files: /tmp/ghostcloud-coverage/coverage-merged-filtered.out
       - go/install-goreleaser:

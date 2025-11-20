@@ -105,6 +105,13 @@ build-vendored:
 
 .PHONY: all build build-linux install init lint build-vendored
 
+clean:
+	@echo "--> Cleaning up build artifacts"
+	@rm -rf $(BUILD_DIR)
+	@echo "--> Clean complete"
+
+.PHONY: clean
+
 ##################
 ###  Protobuf  ###
 ##################

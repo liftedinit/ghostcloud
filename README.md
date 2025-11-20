@@ -19,23 +19,19 @@
 
 Before setting up ghostcloud, ensure your system meets the following prerequisites:
 
-- Ignite CLI, version 0.27.2
-- Go programming language, version 1.21 or higher
+- Go programming language, version 1.25 or higher
 
 ## Get started 
 
 To jumpstart your **ghostcloud** blockchain development, run the following command:
 
 ```
-ignite chain serve
+CHAIN_ID="local-1" HOME_DIR="~/.gc" TIMEOUT_COMMIT="500ms" CLEAN=true sh scripts/test_node.sh
 ```
-
-The `serve` command performs a series of actions: it installs necessary dependencies, compiles your blockchain's source code, initializes the default configuration files, and finally, launches your blockchain in a local development environment.
-
 
 ### Configure
 
-To tailor your development blockchain, modify the settings in the `config.yml` file according to your requirements.
+See the configuration options available in the `scripts/test_node.sh` script to customize your local blockchain setup.
 
 ## How to use
 

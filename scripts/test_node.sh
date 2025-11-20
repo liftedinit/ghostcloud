@@ -4,8 +4,6 @@
 # Example:
 # CHAIN_ID="local-1" HOME_DIR="~/.gc" TIMEOUT_COMMIT="500ms" CLEAN=true sh scripts/test_node.sh
 # CHAIN_ID="local-2" HOME_DIR="~/.gc2" CLEAN=true RPC=36657 REST=2317 PROFF=6061 P2P=36656 GRPC=8090 GRPC_WEB=8091 ROSETTA=8081 TIMEOUT_COMMIT="500ms" sh scripts/test_node.sh
-#
-# To use unoptomized wasm files up to ~5mb, add: MAX_WASM_SIZE=5000000
 
 export KEY="user1"
 export KEY2="user2"
@@ -16,6 +14,7 @@ export KEYALGO="secp256k1"
 export KEYRING=${KEYRING:-"test"}
 export HOME_DIR=$(eval echo "${HOME_DIR:-"~/.gc"}")
 export BINARY=${BINARY:-ghostcloudd}
+export DENOM=${DENOM:-"ugcx"}
 
 export CLEAN=${CLEAN:-"false"}
 export RPC=${RPC:-"26657"}
@@ -49,7 +48,7 @@ from_scratch () {
   # gc1efd63aw40lxf3n4mhf7dzhjkr453axurdehhc6
   echo "wealth flavor believe regret funny network recall kiss grape useless pepper cram hint member few certain unveil rather brick bargain curious require crowd raise" | BINARY keys add $KEY2 --keyring-backend $KEYRING --algo $KEYALGO --recover
 
-  BINARY init $MONIKER --chain-id $CHAIN_ID --default-denom=ugcx
+  BINARY init $MONIKER --chain-id $CHAIN_ID --default-denom=$DENOM
 
 #  # Merge exported Ghostcloud data, e.g., from a CosmosSDK 0.47 version, into the genesis file
 #  # This assumes you have exported the genesis ghostcloud module from Ghostcloud and saved it as [EXPORTED_JSON]
@@ -64,20 +63,20 @@ from_scratch () {
   # Block
   update_test_genesis '.consensus["params"]["block"]["max_gas"]="1000000000"'
   # Gov
-  update_test_genesis '.app_state["gov"]["params"]["min_deposit"]=[{"denom": "ugcx","amount": "1000000"}]'
+  update_test_genesis '.app_state["gov"]["params"]["min_deposit"]=[{"denom": "'$DENOM'","amount": "1000000"}]'
   update_test_genesis '.app_state["gov"]["params"]["voting_period"]="15s"'
   update_test_genesis '.app_state["gov"]["params"]["expedited_voting_period"]="10s"'
 
   update_test_genesis '.app_state["staking"]["params"]["bond_denom"]="upoa"' # PoA Token
   update_test_genesis '.app_state["staking"]["params"]["min_commission_rate"]="0.000000000000000000"'
   # mint
-  update_test_genesis '.app_state["mint"]["params"]["mint_denom"]="ugcx"' # not used
+  update_test_genesis '.app_state["mint"]["params"]["mint_denom"]="'$DENOM'"' # not used
   update_test_genesis '.app_state["mint"]["params"]["blocks_per_year"]="6311520"'
 
 
   # Allocate genesis accounts
-  BINARY genesis add-genesis-account $KEY 1000000upoa,1000000ugcx --keyring-backend $KEYRING
-  BINARY genesis add-genesis-account $KEY2 100000ugcx --keyring-backend $KEYRING
+  BINARY genesis add-genesis-account $KEY 1000000upoa,1000000$DENOM --keyring-backend $KEYRING
+  BINARY genesis add-genesis-account $KEY2 100000$DENOM --keyring-backend $KEYRING
 
   # Set 1 POAToken -> user
   GenTxFlags="--commission-rate=0.0 --commission-max-rate=1.0 --commission-max-change-rate=0.1"
@@ -128,6 +127,6 @@ sed -i 's/address = ":8080"/address = "0.0.0.0:'$ROSETTA'"/g' $HOME_DIR/config/a
 sed -i 's/timeout_commit = "5s"/timeout_commit = "'$TIMEOUT_COMMIT'"/g' $HOME_DIR/config/config.toml
 
 # Start the node
-BINARY start --pruning=nothing  --minimum-gas-prices=0.000000025ugcx --rpc.laddr="tcp://0.0.0.0:$RPC"
+BINARY start --pruning=nothing  --minimum-gas-prices=0.000000025$DENOM --rpc.laddr="tcp://0.0.0.0:$RPC"
 #cosmovisor init $(which $BINARY)
 #cosmovisor run start --pruning=nothing  --minimum-gas-prices=0umfx --rpc.laddr="tcp://0.0.0.0:$RPC" --home $HOME_DIR

@@ -21,7 +21,8 @@ jobs:
       - go/save-mod-cache
       - run: make coverage
       - codecov/upload:
-          file: coverage-filtered.out
+          disable_search: true
+          files: coverage-filtered.out
       - go/install-goreleaser:
           version: *goreleaser_version
       - run: goreleaser release --snapshot --clean

@@ -16,9 +16,9 @@ jobs:
       tag: *go_version
     steps:
       - checkout
-      - go/load-cache
+      - go/load-mod-cache
       - go/mod-download
-      - go/save-cache
+      - go/save-mod-cache
       - run: make coverage
       - codecov/upload:
           file: coverage-filtered.out
